@@ -1,0 +1,154 @@
+---
+title: "index"
+author: "Marlyn Bruno"
+date: "2/20/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(readr)
+
+dcschools <- read.csv("data/EducationDataPortal_02.22.2022_Schools.csv", stringsAsFactor = F)
+glimpse(dcschools)
+
+```
+
+[Urban Institute Education Data] (https://educationdata.urban.org/data-explorer/explorer)
+
+``` {r Visualization 1}
+
+#School to teacher ratio by school level (boxplots)
+dcschools %>%
+  mutate(ptr = enrollment/teachers_fte) %>%
+  filter(school_level == "High"| school_level == "Middle"| school_level =="Primary") %>%
+  group_by(school_level) %>%
+  filter(ptr <100) %>%
+  ggplot() +
+  geom_boxplot(mapping = aes(x = school_level, y = ptr))
+
+```
+Numerous studies have shown that lower student-to-teacher ratios facilitate a better learning environment for students, especially those in primary school. Our data demonstrates that across high schools, middle schools, and primary schools in DC, most schools (>75%) fall below the national 15.3 average ratio (source: Brookings Institute). Nevertheless, there are numerous outliers in DC high schools and primary schools that could potentially be targeted for class-size reduction policies. 
+
+``` {r Visualization 2}
+
+#Math proficiency rate vs. student to teacher ratio by school level
+dcschools %>%
+  filter(school_level == "High"| school_level == "Middle"| school_level =="Primary") %>%
+  mutate(student_teacher = enrollment / teachers_fte) %>%
+  filter(student_teacher <100) %>%
+  ggplot() +
+  geom_point(mapping = aes(x = student_teacher, y = math_test_pct_prof_midpt), alpha = 0.5, color = "red") +
+  facet_wrap(~ school_level) +
+  labs(
+    title = "Student to Teacher Ratio is Not a Good Predictor of Math Proficiency Rates",
+    x = "Student to Teacher Ratio",
+    y = "Percent of Students Testing at Proficient Math Level"
+    ) 
+
+
+```
+We mapped out the relationship between the rate of students scoring proficient on a mathematics assessment and the student-to-teacher ratio for each DC school by school level (high school, middle school, or primary school).Most schools have a student-to--teacher ratio concenetrated between 10 and 15, but there is no clear indication that lower or higher ratios are correlated with better math assessment proficiency rates. If the District wants to improve math achievement outcomes across all school levels, limiting class room size might not prove an effective policy. 
+
+``` {r Visualization 3}
+
+dcschools %>%
+  filter (school_level == "High" | school_level == "Middle" |  school_level == "Primary") %>%
+  ggplot() +
+  geom_bar(mapping = aes(x = school_level, fill = title_i_eligible), position = "fill")
+
+```
+The US Department of Education classifies schools as Title I if students from low-income families make up at least 40 percent of enrollment. Title I funds can be used to target lowest-performing children.
+``` {r Visualization 4}
+
+#tinkering with histogram 
+dcschools %>%
+  filter(school_level == "High"| school_level == "Middle"| school_level =="Primary") %>%
+  mutate(allegations_harass_sex = as.numeric(allegations_harass_sex)) %>%
+  group_by(allegations_harass_sex)%>%
+  filter(!is.na(allegations_harass_sex)) %>%
+  ggplot(aes(allegations_harass_sex)) +
+  geom_histogram(binwidth = 1, color  = "white")
+
+```
+
+``` {r test visualizations, echo = FALSE}
+
+#School to teacher ratio by school level 
+dcschools %>%
+  mutate(ptr = enrollment/teachers_fte) %>%
+  filter(school_level == "High"| school_level == "Middle"| school_level =="Primary") %>%
+  group_by(school_level) %>%
+  summarise (mean_ptr = mean(ptr)) %>%
+  ggplot() +
+  geom_col(mapping = aes(x = school_level, y = mean_ptr))
+
+#test of student lunch program enrollment vs. math proficiency rates
+dcschools %>%
+  filter(school_level == "High"| school_level == "Middle"| school_level =="Primary") %>%
+  mutate(lunch = direct_certification / enrollment) %>%
+  ggplot() +
+  geom_point(mapping = aes(x = lunch, y = math_test_pct_prof_midpt)) +
+  facet_wrap(~ school_level) 
+
+#test histogram
+dcschools %>%
+  filter(school_level == "High"| school_level == "Middle"| school_level =="Primary") %>%
+  mutate(lunch = direct_certification / enrollment) %>%
+  ggplot(aes(lunch)) +
+  geom_histogram(binwidth = 0.05, color  = "white")
+
+#Allegations histogram 
+dcschools %>%
+  filter(school_level == "High"| school_level == "Middle"| school_level =="Primary") %>%
+  group_by(allegations_harass_sex) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = allegations_harass_sex)) +
+  geom_histogram(binwidth = 5, color  = "white")
+
+#leftover possibility looking at absenteeism 
+dcschools %>%
+  filter(school_level == "High"| school_level == "Middle"| school_level =="Primary") %>%
+  mutate(absent = students_chronically_absent / enrollment) %>%
+  filter(absent <1) %>%
+  ggplot() +
+  geom_point(mapping = aes(x = absent, y = math_test_pct_prof_midpt)) +
+  facet_wrap(~ school_level)
+
+#ignore this, it's my attempt at making visualization 2 fancier
+dcschools %>%
+  filter(school_level == "High"| school_level == "Middle"| school_level =="Primary") %>%
+  mutate(student_teacher = enrollment / teachers_fte) %>%
+  filter(student_teacher <100) %>%
+  mutate(numeric_math = as.numeric(math_test_pct_prof_midpt)) %>%
+  filter(numeric_math != "Suppressed data") %>%
+  group_by(school_level) %>%
+  summarize(mean_math_rate = mean(numeric_math)) %>%
+  ggplot() +
+  geom_point(mapping = aes(x = student_teacher, y = math_test_pct_prof_midpt)) +
+  geom_line(mapping = aes(x = student_teacher, y = math_test_pct_prof_midpt)) +
+  facet_wrap(~ school_level) 
+
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

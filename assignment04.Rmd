@@ -1,12 +1,19 @@
 ---
+<<<<<<< HEAD
 title: "index"
 author: "Marlyn Bruno"
 date: "2/20/2022"
+=======
+title: "Assignment04"
+author: "Deepika Nagesh"
+date: "2/22/2022"
+>>>>>>> abdc6e7380f19f3fca1b6180d5309fa91886083e
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+<<<<<<< HEAD
 
 library(tidyverse)
 library(readr)
@@ -133,6 +140,23 @@ dcschools %>%
 
 ```
 
+=======
+```
+
+## IS THIS WORKING 
+
+
+###HAS THIS PUSHED TO DEEPIKA'S BRANCH
+
+
+### TEST 2
+
+### TEST 3 IS THIS PUSHING TO DEEPIKA'S BRANCH
+
+```{r test}
+
+```
+>>>>>>> abdc6e7380f19f3fca1b6180d5309fa91886083e
 ## R Markdown
 
 This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
